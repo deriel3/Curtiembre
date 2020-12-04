@@ -7,6 +7,8 @@
 </template>
 
 <script>
+import EventBus from './EventBus/EventBus';
+import store from './store/index';
 
 export default {
   name: 'App',
@@ -14,5 +16,18 @@ export default {
   data: () => ({
     //
   }),
+  created() {
+    EventBus.$on('cerrar_sesion', () => {
+      this.cerrar_sesion();
+    });
+  },
+  methods: {
+    cerrar_sesion() {
+      this.$toast.error('Sesion Cerrada');
+      store.commit('DELETE_USER');
+      store.commit('DELETE_TOKEN');
+      this.$router.push('/');
+    },
+  },
 };
 </script>

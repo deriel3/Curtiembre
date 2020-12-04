@@ -1,3 +1,97 @@
 <template>
-    <h1>asd2</h1>
+  <v-main class="full-height">
+    <v-app-bar
+      style="position:fixed; z-index:1"
+      color="primary"
+      dark
+    >
+      <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+      <v-toolbar-title>USUARIO X</v-toolbar-title>
+      <v-spacer></v-spacer>
+    </v-app-bar>
+    <v-navigation-drawer
+      v-model="drawer"
+      absolute
+      bottom
+      temporary
+    >
+      <v-list
+        nav
+        dense
+      >
+        <v-list-item-group
+          v-model="group"
+          active-class="blue--text text--primary-5"
+        >
+          <v-list-item to="inicio">
+            <v-list-item-title>Bienvenida</v-list-item-title>
+          </v-list-item>
+          <v-list-item to="material"
+          :disabled="validar_permiso('1')"
+          >
+            <v-list-item-title>Materiales</v-list-item-title>
+          </v-list-item>
+          <v-list-item :to="{name:'formulas', query: {tab:'0'}}">
+            <v-list-item-title>Formulas</v-list-item-title>
+          </v-list-item>
+          <v-list-item to="/bienvenida2">
+            <v-list-item-title>Produccion</v-list-item-title>
+          </v-list-item>
+          <v-list-item to="/bienvenida2">
+            <v-list-item-title>Gestionar Cuentas</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="cerrar_sesion">
+            <v-list-item-title class="red--text">Cerrar Sesion</v-list-item-title>
+          </v-list-item>
+        </v-list-item-group>
+      </v-list>
+    </v-navigation-drawer>
+    <transition name="fade" mode="out-in">
+      <router-view></router-view>
+    </transition>
+  </v-main>
 </template>
+<script>
+import EventBus from '../EventBus/EventBus';
+import store from '../store/index';
+
+export default {
+  data: () => ({
+    drawer: false,
+    group: null,
+    permisos: [],
+  }),
+  created() {
+    this.permisos = store.state.user.permisos;
+    const actual = this.$route.name;
+    if (actual === 'CiteccalProd') {
+      this.$router.push({ name: 'inicio' });
+    }
+  },
+  watch: {
+    group() {
+      this.drawer = false;
+    },
+  },
+  methods: {
+    cerrar_sesion() {
+      EventBus.$emit('cerrar_sesion');
+    },
+    validar_permiso(permiso) {
+      return this.permisos.filter((val) => val.cod_rol === permiso).length === 0;
+    },
+  },
+};
+</script>
+<style>
+.full-height {
+    height: 100vh
+}
+.fade-enter, .fade-leave-to{
+  opacity : 0;
+  transform: translateX(2em)
+}
+.fade-enter-active, .fade-leave-active{
+  transition: all .3s ease;
+}
+</style>

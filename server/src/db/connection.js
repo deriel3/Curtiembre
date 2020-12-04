@@ -1,4 +1,4 @@
-const mysql = require('mysql');
+const mysql = require('mysql-await');
 
 //local mysql db connection
 let connection = mysql.createConnection({
