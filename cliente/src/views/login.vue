@@ -148,7 +148,6 @@ export default {
       axios(option)
         .then((res) => {
           if (res.data.cod === '200') {
-            console.log(res.data.permisos);
             store.commit('SET_USER', { usuario: this.usuario, id: res.data.id, permisos: res.data.permisos });
             store.commit('SET_TOKEN', res.data.token);
             this.$toast.success(`Bienvenid@ ${this.usuario}`);

@@ -16,7 +16,7 @@ const routes = [
     component: () => import(/* webpackChunkName: "login" */ '../views/login.vue'),
     beforeEnter: (to, from, next) => {
       if (store.state.token) {
-        next('/bienvenida');
+        next('/CiteccalProd');
       } else {
         next();
       }
@@ -51,14 +51,23 @@ const routes = [
       },
     },
     {
+      path: 'desarrollo-producto',
+      name: 'desarrollo-producto',
+      component: () => import(/* webpackChunkName: "desarrollo-producto" */ '../views/desarrollo_producto.vue'),
+      beforeEnter: (to, from, next) => {
+        if (store.state.user.permisos.filter((val) => val.cod_rol === 9).length > 0) {
+          next();
+        } else {
+          next('CiteccalProd/inicio');
+        }
+      },
+    },
+    {
       path: 'formulas',
       name: 'formulas',
       component: () => import(/* webpackChunkName: "formulas" */ '../views/formula.vue'),
       beforeEnter: (to, from, next) => {
-        if (store.state.user.permisos.filter((val) => val.cod_rol === 2
-        || val.cod_rol === 3
-        || val.cod_rol === 4
-        || val.cod_rol === 5).length > 0) {
+        if (store.state.user.permisos.filter((val) => val.cod_rol === 9).length > 0) {
           next();
         } else {
           next('CiteccalProd/inicio');
@@ -74,6 +83,18 @@ const routes = [
         || val.cod_rol === 3
         || val.cod_rol === 4
         || val.cod_rol === 5).length > 0) {
+          next();
+        } else {
+          next('CiteccalProd/inicio');
+        }
+      },
+    },
+    {
+      path: 'gestionar-cuentas',
+      name: 'gestionar-cuentas',
+      component: () => import(/* webpackChunkName: "gestionar-cuentas" */ '../views/gestionar-cuentas.vue'),
+      beforeEnter: (to, from, next) => {
+        if (store.state.user.permisos.filter((val) => val.cod_rol === 0).length > 0) {
           next();
         } else {
           next('CiteccalProd/inicio');

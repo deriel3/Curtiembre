@@ -31,11 +31,6 @@
                       <v-btn
                       class="primary white--text justify-center mr-3"
                       rounded>Cambiar Contraseña</v-btn>
-                      <v-btn
-                      class="success white--text justify-center"
-                      rounded>
-                        Gestionar Empresa
-                      </v-btn>
                   </div>
                 </div>
               </div>

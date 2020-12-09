@@ -6,7 +6,7 @@
       dark
     >
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-      <v-toolbar-title>USUARIO X</v-toolbar-title>
+      <v-toolbar-title>{{usuario_actual}}</v-toolbar-title>
       <v-spacer></v-spacer>
     </v-app-bar>
     <v-navigation-drawer
@@ -27,17 +27,19 @@
             <v-list-item-title>Bienvenida</v-list-item-title>
           </v-list-item>
           <v-list-item to="material"
-          :disabled="validar_permiso('1')"
+          :disabled="validar_permiso(1)"
           >
             <v-list-item-title>Materiales</v-list-item-title>
           </v-list-item>
-          <v-list-item :to="{name:'formulas', query: {tab:'0'}}">
-            <v-list-item-title>Formulas</v-list-item-title>
+          <v-list-item :to="{name:'desarrollo-producto'}"
+          :disabled="validar_permiso(9)">
+            <v-list-item-title>Desarrollo de producto</v-list-item-title>
           </v-list-item>
           <v-list-item to="/bienvenida2">
             <v-list-item-title>Produccion</v-list-item-title>
           </v-list-item>
-          <v-list-item to="/bienvenida2">
+          <v-list-item to="gestionar-cuentas"
+          :disabled="validar_permiso(0)">
             <v-list-item-title>Gestionar Cuentas</v-list-item-title>
           </v-list-item>
           <v-list-item @click="cerrar_sesion">
@@ -60,8 +62,10 @@ export default {
     drawer: false,
     group: null,
     permisos: [],
+    usuario_actual: '',
   }),
   created() {
+    this.usuario_actual = store.state.user.usuario;
     this.permisos = store.state.user.permisos;
     const actual = this.$route.name;
     if (actual === 'CiteccalProd') {
@@ -80,6 +84,7 @@ export default {
     validar_permiso(permiso) {
       return this.permisos.filter((val) => val.cod_rol === permiso).length === 0;
     },
+
   },
 };
 </script>

@@ -140,9 +140,9 @@ export default {
           materiales: valor,
         },
       };
+      console.log(option);
       axios(option)
         .then((res) => {
-          console.log(res);
           if (res.data.cod === '200') {
             this.$toast.success('Datos importados con exito.');
             this.material = [];

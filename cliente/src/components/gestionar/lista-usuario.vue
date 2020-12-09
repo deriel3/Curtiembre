@@ -5,16 +5,29 @@
       class="mx-auto my-5">
         <v-card-text>
           <div align="center">
-            <h1>Material: </h1>
+            <h1>Informacion del Usuario: </h1>
             <v-text-field
             :readonly="true"
             v-model="seleccionados[0].codigo"
             label="Codigo">
             </v-text-field>
             <v-text-field
-            v-model="seleccionados[0].descripcion"
-            label="Descripcion">
+            v-model="seleccionados[0].nombre"
+            label="Nombre del usuario">
             </v-text-field>
+            <label for="">Permisos:</label>
+            <v-row>
+              <v-col
+              v-for="(item, index) in lista_roles" :key="index"
+              md="4"
+              sm="4"
+              cols="4">
+                <v-checkbox
+                v-model="permisos"
+                :label="item.rol"
+                :value="item.codigo"></v-checkbox>
+              </v-col>
+            </v-row>
             <v-btn color="yellow lighten-1" class="mr-4" @click="actualizar">Actualizar</v-btn>
             <v-btn v-if="seleccionados[0].estado === 'Activo'" color="error" @click="desactivar">
               Desactivar</v-btn>
@@ -23,7 +36,6 @@
         </v-card-text>
       </v-card>
       <v-card-title>
-          Lista de Materiales
           <v-spacer></v-spacer>
           <v-text-field
           v-model="search"
@@ -39,10 +51,11 @@
       v-model="seleccionados"
       item-key="codigo"
       show-select
+      @item-selected="seleccionado"
       :loading="cargando"
       :single-select="true"
       :headers="headers"
-      :items="material"
+      :items="lista_usuarios"
       :search="search">
       </v-data-table>
     </v-card>
@@ -59,25 +72,33 @@ export default {
       seleccionados: [],
       search: '',
       headers: [{
-        text: 'Codigo',
+        text: 'DNI',
         align: 'start',
         value: 'codigo',
       },
       {
-        text: 'Descripcion del material',
-        value: 'descripcion',
+        text: 'Nombre',
+        value: 'nombre',
       },
       {
         text: 'Estado',
         value: 'estado',
       }],
-      material: [],
+      lista_usuarios: [],
+      lista_permisos: [],
+      lista_roles: [],
+      permisos: [],
     };
   },
   created() {
     this.actualizar_tabla();
   },
   methods: {
+    seleccionado(seleccionado) {
+      this.permisos = this.lista_permisos
+        .filter((item) => item.cod_usuario === seleccionado.item.codigo);
+      this.permisos = this.permisos.map((val) => val.cod_rol);
+    },
     desactivar() {
       this.seleccionados[0].estado = 'Inactivo';
       this.actualizar_estado('Inactivo');
@@ -90,7 +111,7 @@ export default {
       const { token } = store.state;
       const option = {
         // eslint-disable-next-line prefer-template
-        url: process.env.VUE_APP_URL_SERVER + '/api/estado_material',
+        url: process.env.VUE_APP_URL_SERVER + '/api/estado_usuario',
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -105,7 +126,7 @@ export default {
       axios(option)
         .then((res) => {
           if (res.data.cod === '200') {
-            this.$toast.success('Material Actualizado');
+            this.$toast.success('Usuario Actualizado');
             this.seleccionados = [];
           }
         })
@@ -118,20 +139,29 @@ export default {
     actualizar_tabla() {
       this.cargando = true;
       const { token } = store.state;
+      const dni = store.state.user.id;
       const option = {
         // eslint-disable-next-line prefer-template
-        url: process.env.VUE_APP_URL_SERVER + '/api/obtener_materiales',
-        method: 'GET',
+        url: process.env.VUE_APP_URL_SERVER + '/api/obtener_usuarios',
+        method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
           Accept: 'application/json',
           'Content-Type': 'application/json;charset=UTF-8',
         },
+        data: {
+          codigo: dni,
+        },
       };
       axios(option)
         .then((res) => {
-          this.material = res.data.data;
           this.cargando = false;
+          const { data } = res;
+          if (data.cod === '200') {
+            this.lista_usuarios = data.data.usuarios;
+            this.lista_permisos = data.data.permisos;
+            this.lista_roles = data.data.roles;
+          }
         })
         .catch((err) => {
           if (err.response.status === 401) {
@@ -139,11 +169,19 @@ export default {
           }
         });
     },
+    nuevos_permisos() {
+      const tmp = [];
+      for (let i = 0; i < this.permisos.length; i += 1) {
+        tmp[i] = [this.permisos[i], this.seleccionados[0].codigo];
+      }
+      return tmp;
+    },
     actualizar() {
       const { token } = store.state;
+      const NuevosPermisos = this.nuevos_permisos();
       const option = {
         // eslint-disable-next-line prefer-template
-        url: process.env.VUE_APP_URL_SERVER + '/api/actualizar_material',
+        url: process.env.VUE_APP_URL_SERVER + '/api/actualizar_usuario',
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -152,13 +190,14 @@ export default {
         },
         data: {
           codigo: this.seleccionados[0].codigo,
-          descripcion: this.seleccionados[0].descripcion,
+          nombre: this.seleccionados[0].nombre,
+          permisos: NuevosPermisos,
         },
       };
       axios(option)
         .then((res) => {
           if (res.data.cod === '200') {
-            this.$toast.success('Material Actualizado');
+            this.$toast.success('Usuario Actualizado');
             this.seleccionados = [];
           }
         })
