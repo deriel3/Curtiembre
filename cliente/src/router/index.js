@@ -51,9 +51,21 @@ const routes = [
       },
     },
     {
-      path: 'desarrollo-producto',
-      name: 'desarrollo-producto',
-      component: () => import(/* webpackChunkName: "desarrollo-producto" */ '../views/desarrollo_producto.vue'),
+      path: 'articulo',
+      name: 'articulo',
+      component: () => import(/* webpackChunkName: "articulo" */ '../views/articulo.vue'),
+      beforeEnter: (to, from, next) => {
+        if (store.state.user.permisos.filter((val) => val.cod_rol === 9).length > 0) {
+          next();
+        } else {
+          next('CiteccalProd/inicio');
+        }
+      },
+    },
+    {
+      path: 'acabados',
+      name: 'acabados',
+      component: () => import(/* webpackChunkName: "acabados" */ '../views/acabado.vue'),
       beforeEnter: (to, from, next) => {
         if (store.state.user.permisos.filter((val) => val.cod_rol === 9).length > 0) {
           next();
@@ -66,18 +78,6 @@ const routes = [
       path: 'formulas',
       name: 'formulas',
       component: () => import(/* webpackChunkName: "formulas" */ '../views/formula.vue'),
-      beforeEnter: (to, from, next) => {
-        if (store.state.user.permisos.filter((val) => val.cod_rol === 9).length > 0) {
-          next();
-        } else {
-          next('CiteccalProd/inicio');
-        }
-      },
-    },
-    {
-      path: 'nueva-formula',
-      name: 'nueva-formula',
-      component: () => import(/* webpackChunkName: "nueva-formula" */ '../views/nuevaformula.vue'),
       beforeEnter: (to, from, next) => {
         if (store.state.user.permisos.filter((val) => val.cod_rol === 2
         || val.cod_rol === 3

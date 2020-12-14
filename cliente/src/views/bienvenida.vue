@@ -31,12 +31,26 @@
           >
             <v-list-item-title>Materiales</v-list-item-title>
           </v-list-item>
-          <v-list-item :to="{name:'desarrollo-producto'}"
+          <v-list-item :to="{name:'formulas'}"
+          :disabled="validar_permiso(2)
+          || validar_permiso(3)
+          || validar_permiso(4)
+          || validar_permiso(5)">
+            <v-list-item-title>Base de datos de Formulas</v-list-item-title>
+          </v-list-item>
+          <v-list-item :to="{name:'articulo'}"
           :disabled="validar_permiso(9)">
-            <v-list-item-title>Desarrollo de producto</v-list-item-title>
+            <v-list-item-title>Base de datos de Articulos</v-list-item-title>
+          </v-list-item>
+          <v-list-item :to="{name:'acabados'}"
+          :disabled="validar_permiso(9)">
+            <v-list-item-title>Base de datos de Acabados</v-list-item-title>
           </v-list-item>
           <v-list-item to="/bienvenida2">
-            <v-list-item-title>Produccion</v-list-item-title>
+            <v-list-item-title>Orden de Pedido</v-list-item-title>
+          </v-list-item>
+          <v-list-item to="/bienvenida2">
+            <v-list-item-title>Orden de Teñido</v-list-item-title>
           </v-list-item>
           <v-list-item to="gestionar-cuentas"
           :disabled="validar_permiso(0)">
