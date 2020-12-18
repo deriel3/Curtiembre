@@ -64,11 +64,17 @@
         </v-row>
       </v-card-title>
       <v-card-text>
-        <v-card v-if="codigo_validado" width="1000" class="mx-auto ma-5">
+        <v-card v-if="codigo_validado" class="mx-auto ma-5">
           <v-card-title>Agregar Material a la formula</v-card-title>
           <v-card-text>
             <v-row>
-              <v-col md="3">
+              <v-col md="1">
+                <v-text-field
+                type="number"
+                v-model="orden"
+                label="Orden"></v-text-field>
+              </v-col>
+              <v-col md="2">
                 <v-text-field
                 type="number"
                 v-model="porcentaje"
@@ -83,17 +89,22 @@
                 label="Material">
                 </v-autocomplete>
               </v-col>
-              <v-col md="3">
+              <v-col md="2">
                 <v-text-field
                 :readonly="true"
                 type="number"
                 v-model="cantidad"
                 label="Cantidad"></v-text-field>
               </v-col>
-              <v-col md="3">
+              <v-col md="1">
                 <v-text-field
                 v-model="tiempo"
-                label="Tiempo "></v-text-field>
+                label="Tiempo (min)"></v-text-field>
+              </v-col>
+              <v-col md="3">
+                <v-text-field
+                v-model="observacion"
+                label="Observacion"></v-text-field>
               </v-col>
             </v-row>
             <v-btn color="primary" @click="agregar_material">Agregar material</v-btn>
@@ -104,7 +115,8 @@
           <v-spacer></v-spacer>
           <v-btn
           color="error"
-          class="ml-5" v-if="seleccionados.length>0" >Borrar seleccionados</v-btn>
+          class="ml-5" v-if="seleccionados.length>0" @click="borrar_seleccionado">
+          Borrar seleccionados</v-btn>
       </v-card-title>
         <v-data-table
         v-model="seleccionados"
@@ -117,6 +129,7 @@
       </v-card-text>
       <v-card-actions>
         <v-btn color="primary"
+        @click="guardar_formula"
         >Guardar</v-btn>
       </v-card-actions>
     </v-card>
@@ -148,12 +161,20 @@ export default {
       lista_materiales: [],
       cabecera: [
         {
+          text: 'Orden',
+          value: 'orden',
+        },
+        {
           text: 'Codigo del Detalle',
           value: 'codigo',
         },
         {
           text: 'Porcentaje',
           value: 'porcentaje',
+        },
+        {
+          text: 'Codigo',
+          value: 'codigo_material',
         },
         {
           text: 'Material',
@@ -164,15 +185,22 @@ export default {
           value: 'cantidad',
         },
         {
-          text: 'Tiempo',
+          text: 'Tiempo (min)',
           value: 'tiempo',
+        },
+        {
+          text: 'Observacion',
+          value: 'observacion',
         },
       ],
       lista_previa: [],
+      lista_detalle: [],
       seleccionados: [],
+      orden: '',
       porcentaje: '',
       material: '',
-      tiempo: 0,
+      tiempo: '',
+      observacion: '',
     };
   },
   created() {
@@ -181,11 +209,10 @@ export default {
   computed: {
     cantidad() {
       if (this.porcentaje !== '') {
-        const cantidad = (parseInt(this.porcentaje, 10) * 1) / 100; 
-        return cantidad;
-      } else {
-        return "No se pudo calcular";
+        const cantidad = (parseFloat(this.porcentaje) * 1) / 100;
+        return parseFloat(cantidad).toFixed(4);
       }
+      return '0';
     },
     codigoErrors() {
       const errors = [];
@@ -201,6 +228,78 @@ export default {
     },
   },
   methods: {
+    borrar_seleccionado() {
+      const nuevalista = [];
+      const nuevodetalle = [];
+      for (let i = 0; i < this.lista_previa.length; i += 1) {
+        let flag = false;
+        for (let j = 0; j < this.seleccionados.length; j += 1) {
+          if (this.lista_previa[i].codigo === this.seleccionados[j].codigo) {
+            flag = true;
+            break;
+          }
+        }
+        if (!flag) {
+          nuevalista.push(this.lista_previa[i]);
+          const detalle = {
+            codigo: this.lista_previa[i].codigo,
+            cabecera: this.codigo.toUpperCase(),
+            material: this.lista_previa[i].codigo_material,
+            porcentaje: this.lista_previa[i].porcentaje,
+            cantidad: this.lista_previa[i].cantidad,
+            tiempo: this.lista_previa[i].tiempo,
+            observacion: this.lista_previa[i].observacion,
+          };
+          nuevodetalle.push(detalle);
+        }
+      }
+      this.lista_previa = nuevalista;
+      this.seleccionados = [];
+      this.lista_detalle = nuevodetalle;
+    },
+    reiniciar() {
+      this.codigo = '';
+      this.tipo_formula = '';
+      this.lista_previa = [];
+      this.lista_detalle = [];
+    },
+    guardar_formula() {
+      const valor = this.lista_detalle.map((obj) => Object.values(obj));
+      console.log(valor);
+      if (this.codigo_validado) {
+        const { token } = store.state;
+        const option = {
+          // eslint-disable-next-line prefer-template
+          url: process.env.VUE_APP_URL_SERVER + '/api/guardar_formula',
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
+            'Content-Type': 'application/json;charset=UTF-8',
+          },
+          data: {
+            codigo: this.codigo.toUpperCase(),
+            usuario_creado: this.creado,
+            proceso: this.tipo_formula,
+            detalle_formula: valor,
+          },
+        };
+        axios(option)
+          .then((res) => {
+            if (res.data.cod === '200') {
+              this.$toast.success('Formula registrada');
+              this.reiniciar();
+            }
+          })
+          .catch((err) => {
+            if (err.response.status === 401) {
+              EventBus.$emit('cerrar_sesion');
+            }
+          });
+      } else {
+        this.$toast.error('Codigo erroneo');
+      }
+    },
     validar() {
       if (this.codigo !== '') {
         const { token } = store.state;
@@ -224,6 +323,7 @@ export default {
               this.codigo_validado = true;
             } else {
               this.$toast.error('Codigo ya registrado.');
+              this.codigo = '';
               this.codigo_validado = false;
             }
           })
@@ -262,18 +362,40 @@ export default {
         });
     },
     agregar_material() {
-      if (this.codigo !== '') {
+      if (this.codigo !== ''
+      && this.porcentaje !== ''
+      && this.material !== ''
+      && this.cantidad !== '') {
+        const datomaterial = this.material.split('-');
         const random = Math.floor(Math.random() * (9999999 - 1000000)) + 1000000;
         const material = {
+          orden: this.orden,
           codigo: `${this.codigo}-${random}`,
           porcentaje: this.porcentaje,
-          material: this.material,
+          codigo_material: datomaterial[0],
+          material: datomaterial[1],
           cantidad: this.cantidad,
           tiempo: this.tiempo,
+          observacion: this.observacion,
+        };
+        const detalle = {
+          orden: this.orden,
+          codigo: `${this.codigo}-${random}`,
+          cabecera: this.codigo.toUpperCase(),
+          material: datomaterial[0],
+          porcentaje: this.porcentaje,
+          cantidad: this.cantidad,
+          tiempo: this.tiempo,
+          observacion: this.observacion,
         };
         this.lista_previa.push(material);
+        this.lista_detalle.push(detalle);
+        this.porcentaje = '';
+        this.material = '';
+        this.tiempo = '';
+        this.observacion = '';
       } else {
-        this.$toast.error('Ingrese un codigo para la formula.');
+        this.$toast.error('LLene los campos requeridos.');
       }
     },
   },

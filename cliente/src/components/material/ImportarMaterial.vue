@@ -140,7 +140,6 @@ export default {
           materiales: valor,
         },
       };
-      console.log(option);
       axios(option)
         .then((res) => {
           if (res.data.cod === '200') {

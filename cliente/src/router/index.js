@@ -46,7 +46,7 @@ const routes = [
         if (store.state.user.permisos.filter((val) => val.cod_rol === 1).length > 0) {
           next();
         } else {
-          next('CiteccalProd/inicio');
+          next('/CiteccalProd/inicio');
         }
       },
     },
@@ -58,7 +58,7 @@ const routes = [
         if (store.state.user.permisos.filter((val) => val.cod_rol === 9).length > 0) {
           next();
         } else {
-          next('CiteccalProd/inicio');
+          next('/CiteccalProd/inicio');
         }
       },
     },
@@ -70,7 +70,7 @@ const routes = [
         if (store.state.user.permisos.filter((val) => val.cod_rol === 9).length > 0) {
           next();
         } else {
-          next('CiteccalProd/inicio');
+          next('/CiteccalProd/inicio');
         }
       },
     },
@@ -85,7 +85,7 @@ const routes = [
         || val.cod_rol === 5).length > 0) {
           next();
         } else {
-          next('CiteccalProd/inicio');
+          next('/CiteccalProd/inicio');
         }
       },
     },
@@ -97,7 +97,31 @@ const routes = [
         if (store.state.user.permisos.filter((val) => val.cod_rol === 0).length > 0) {
           next();
         } else {
-          next('CiteccalProd/inicio');
+          next('/CiteccalProd/inicio');
+        }
+      },
+    },
+    {
+      path: 'editar-formula/:codigo',
+      name: 'editar-formula',
+      component: () => import(/* webpackChunkName: "editar-formula" */ '../views/editar-formula.vue'),
+      beforeEnter: (to, from, next) => {
+        if (store.state.user.permisos.filter((val) => val.cod_rol === 10).length > 0) {
+          next();
+        } else {
+          next('/CiteccalProd/inicio');
+        }
+      },
+    },
+    {
+      path: 'orden_pedido',
+      name: 'orden_pedido',
+      component: () => import(/* webpackChunkName: "orden_pedido" */ '../views/orden_pedido.vue'),
+      beforeEnter: (to, from, next) => {
+        if (store.state.user.permisos.filter((val) => val.cod_rol === 6).length > 0) {
+          next();
+        } else {
+          next('/CiteccalProd/inicio');
         }
       },
     },

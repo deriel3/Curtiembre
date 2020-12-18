@@ -202,4 +202,65 @@ router.post('/validar_codigo_formula',jwtmid({secret: config.llave, algorithms: 
         res.json({cod: '201'})
     }
 })
+router.post('/guardar_formula',jwtmid({secret: config.llave, algorithms: ['HS256']}), async (req,res) => {
+    const query_cabecera = "INSERT INTO cabecera_formula (codigo, usuario_creador, proceso) values ('"+req.body.codigo+"','"+req.body.usuario_creado+"','"+req.body.proceso+"')"
+    const resultado = await sql.awaitQuery(query_cabecera)
+    console.log(resultado.length === 0);
+    if (resultado.length !== 0) {
+        const query_detalle = "INSERT INTO detalle_formula (orden, codigo, cabecera, material, porcentaje, cantidad, tiempo, observacion) values ?"
+        const values = [req.body.detalle_formula];
+        const resultado_detalle = await sql.awaitQuery(query_detalle,values);
+        if(resultado_detalle.length !== 0) {
+            res.json({cod:'200'})
+        }
+        else
+        {
+            res.json({cod:'201'})
+        }
+    } else {
+        res.json({cod:'201'})
+    }
+})
+router.get('/obtener_formula',jwtmid({secret: config.llave, algorithms: ['HS256']}), async (req,res) => {
+    const query_formulas = "SELECT cabecera_formula.codigo, cabecera_formula.peso_base, usuario.nombre as usuario_creador, cabecera_formula.version, proceso.proceso from cabecera_formula"
+    +" Inner Join usuario on cabecera_formula.usuario_creador = usuario.codigo"
+    +" Inner Join proceso on cabecera_formula.proceso = proceso.codigo";
+    const resultado = await sql.awaitQuery(query_formulas);
+    if(resultado.length !== 0) {
+        res.json({cod: '200', data: resultado})
+    } else {
+        res.json({cod: '201'})
+    }
+})
+router.post('/obtener_detalle',jwtmid({secret: config.llave, algorithms: ['HS256']}), async (req,res) => {
+    const query= "SELECT detalle_formula.orden, detalle_formula.codigo, detalle_formula.porcentaje,material.codigo as material,material.descripcion, detalle_formula.cantidad, detalle_formula.tiempo, detalle_formula.observacion from detalle_formula INNER JOIN material on detalle_formula.material = material.codigo WHERE detalle_formula.cabecera = ?"
+    const r = await sql.awaitQuery(query,req.body.codigo);
+    res.json({cod:'200', data: r})
+})
+router.post('/obtener_formula',jwtmid({secret: config.llave, algorithms: ['HS256']}), async (req,res) => {
+    const material = "SELECT codigo, descripcion from material where estado = 'Activo'";
+    const resultado_material = await sql.awaitQuery(material)
+    const proceso = "SELECT codigo, proceso from proceso where estado = 'Activo'";
+    const resultado_proceso = await sql.awaitQuery(proceso)
+    const cabecera = "SELECT cabecera_formula.peso_base, usuario.nombre as usuario_creador, cabecera_formula.version, cabecera_formula.proceso FROM cabecera_formula INNER JOIN usuario on cabecera_formula.usuario_creador = usuario.codigo WHERE cabecera_formula.codigo = ?";
+    const resultado = await sql.awaitQuery(cabecera,req.body.codigo)
+    const query= "SELECT detalle_formula.orden,detalle_formula.codigo, detalle_formula.cabecera, detalle_formula.porcentaje,material.codigo as material,material.descripcion, detalle_formula.cantidad, detalle_formula.tiempo, detalle_formula.observacion from detalle_formula INNER JOIN material on detalle_formula.material = material.codigo WHERE detalle_formula.cabecera = ? ORDER BY orden ASC"
+    const r = await sql.awaitQuery(query,req.body.codigo);
+    res.json({cod:'200', data:{cabecera: resultado, detalle: r, proceso: resultado_proceso, material: resultado_material}})
+})
+router.post('/guardar_cambios',jwtmid({secret: config.llave, algorithms: ['HS256']}), async (req,res) => {
+    const borrar_detalle = "delete from detalle_formula where cabecera = ?"
+    const resultado = await sql.awaitQuery(borrar_detalle,req.body.codigo)
+    const nuevo_detalle = "INSERT INTO detalle_formula (orden,codigo, cabecera, porcentaje, material , cantidad, tiempo, observacion) values ?"
+    console.log(req.body.detalle)
+    const values = [req.body.detalle]
+    const resultado_detalle = await sql.awaitQuery(nuevo_detalle,values);
+    if(resultado_detalle.length !== 0) {
+        res.json({cod:'200'})
+    }
+    else
+    {
+        res.json({cod:'201'})
+    }
+})
 module.exports=router;
