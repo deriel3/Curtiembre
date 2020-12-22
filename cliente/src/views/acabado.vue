@@ -13,18 +13,27 @@
               <div>
                   <h1 class="d-inline ml-8">Acabados Registrados</h1>
               </div>
+              <lista></lista>
           </v-tab-item>
           <v-tab-item>
               <div>
                   <h1 class="d-inline ml-8">Nuevo Acabado:</h1>
               </div>
+              <formulario></formulario>
           </v-tab-item>
       </v-tabs-items>
     </div>
     </v-container>
 </template>
 <script>
+import formulario from '../components/acabado/registrar.vue';
+import lista from '../components/acabado/lista.vue';
+
 export default {
+  components: {
+    formulario,
+    lista,
+  },
   data() {
     return {
       margen: 0,

@@ -265,7 +265,6 @@ export default {
     },
     guardar_formula() {
       const valor = this.lista_detalle.map((obj) => Object.values(obj));
-      console.log(valor);
       if (this.codigo_validado) {
         const { token } = store.state;
         const option = {

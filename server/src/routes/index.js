@@ -263,4 +263,73 @@ router.post('/guardar_cambios',jwtmid({secret: config.llave, algorithms: ['HS256
         res.json({cod:'201'})
     }
 })
+router.get('/obtener_datos_op',jwtmid({secret: config.llave, algorithms: ['HS256']}), async (req,res) => {
+    const formulas_pelambre = "SELECT codigo from cabecera_formula where proceso = '01'";
+    const resultado = await sql.awaitQuery(formulas_pelambre);
+    const formulas_curtido = "SELECT codigo from cabecera_formula where proceso = '02'";
+    const resultado_curtido = await sql.awaitQuery(formulas_curtido);
+    res.json({cod:'200', data: {pelambre: resultado, curtido: resultado_curtido}});
+})
+router.post('/verificar_codigo_op',jwtmid({secret: config.llave, algorithms: ['HS256']}), async (req,res) => {
+    const verificar_codigo = "SELECT codigo from orden_p where codigo = ?";
+    const value = [req.body.codigo]
+    const resultado = await sql.awaitQuery(verificar_codigo, value);
+    if(resultado.length === 0) {
+        res.json({cod:'200'})
+    } else {
+        res.json({cod:'201'})
+    }
+})
+router.post('/guardar_op',jwtmid({secret: config.llave, algorithms:['HS256']}),async (req,res) => {
+    const ingresar = "INSERT INTO orden_p (codigo, kilos, pieles ,fpelambre, fcurtido, autor, ppelambre, pcurtido) values ('"+req.body.codigo.toUpperCase()+"','"+req.body.kilo+"','"+req.body.piele+"','"+req.body.fpelambre+"','"+req.body.fcurtido+"','"+req.body.autor+"','"+req.body.ppelambre.toString()+"','"+req.body.pcurtido.toString()+"')";
+    const resultado = await sql.awaitQuery(ingresar);
+    res.json({cod:'200'})
+})
+router.get('/obtener_op',jwtmid({secret: config.llave, algorithms:['HS256']}),async (req,res) => {
+    const lista = "SELECT codigo, kilos, pieles, fpelambre, fcurtido from orden_p";
+    const resultado = await sql.awaitQuery(lista);
+    res.json({cod:'200', data:resultado})
+})
+router.get('/obtener_data_acabado',jwtmid({secret: config.llave, algorithms:['HS256']}),async (req,res) => {
+    const articulo = "SELECT codigo, base from articulo where estado = 'Activo'";
+    const resultado_articulo = await sql.awaitQuery(articulo);
+    const frecurtido = "SELECT codigo from cabecera_formula where proceso = '03'";
+    const resultado_frecurtido = await sql.awaitQuery(frecurtido);
+    const facabado = "SELECT codigo from cabecera_formula where proceso = '04'";
+    const resultado_facbado = await sql.awaitQuery(facabado);
+    res.json({cod:'200', data:{articulo: resultado_articulo, frecurtido: resultado_frecurtido, facabado: resultado_facbado}})
+})
+router.post('/verificar_codigo_acabado',jwtmid({secret: config.llave, algorithms:['HS256']}),async (req,res) => {
+    const articulo = "SELECT codigo from acabado where codigo = ?";
+    const value = [req.body.codigo];
+    const resultado_articulo = await sql.awaitQuery(articulo,value);
+    if(resultado_articulo.length === 0) {
+        res.json({cod:'200'})
+    } else {
+        res.json({cod:'201'})
+    }
+})
+router.post('/nuevo_acabado',jwtmid({secret: config.llave, algorithms:['HS256']}),async (req,res) => {
+    const articulo = "INSERT INTO acabado (codigo_articulo, codigo, acabado, color, calibre, frecurtido, facabado) VALUES ('"+req.body.producto[0]+"','"+req.body.producto[1]+"','"+req.body.producto[2]+"','"+req.body.producto[3]+"','"+req.body.producto[4]+"','"+req.body.producto[5]+"','"+req.body.producto[6]+"')";
+    const resultado_articulo = await sql.awaitQuery(articulo);
+    res.json({cod:'200'})
+})
+router.get('/obtener_acabados',jwtmid({secret: config.llave, algorithms:['HS256']}),async (req,res) => {
+    const articulo = "SELECT codigo, codigo_articulo, acabado, color, calibre, frecurtido, facabado, estado from acabado";
+    const resultado_articulo = await sql.awaitQuery(articulo);
+    res.json({cod:'200', data: resultado_articulo})
+})
+router.post('/actualizar_acabado',jwtmid({secret: config.llave, algorithms: ['HS256']}), async (req,res) => {
+    const query_actualizar = "Update acabado set acabado = ?, color = ?, calibre = ? where codigo = ?"
+    const values = [req.body.acabado,req.body.color,req.body.calibre, req.body.codigo];
+    const resultado_articulo = await sql.awaitQuery(query_actualizar,values)
+    res.json({cod:'200'});
+})
+router.post('/estado_acabado',jwtmid({secret: config.llave, algorithms: ['HS256']}), async (req,res) => {
+    const query = "Update acabado set estado = ? where codigo = ?";
+    const values = [req.body.estado, req.body.codigo];
+    const resultado = await sql.awaitQuery(query,values);
+    res.json({cod:'200'});
+})
+
 module.exports=router;

@@ -50,7 +50,8 @@
           :disabled="validar_permiso(6)">
             <v-list-item-title>Orden de Pedido</v-list-item-title>
           </v-list-item>
-          <v-list-item to="/bienvenida2">
+          <v-list-item :to="{name:'orden_tenido'}"
+          :disabled="validar_permiso(7)">
             <v-list-item-title>Orden de Teñido</v-list-item-title>
           </v-list-item>
           <v-list-item to="gestionar-cuentas"

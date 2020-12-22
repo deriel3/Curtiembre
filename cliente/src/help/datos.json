@@ -1,0 +1,16 @@
+{
+  "pelambre": [
+    {"codigo": "0", "descripcion": "Pre-remojo"},
+    {"codigo": "1", "descripcion": "Pre-descarne"},
+    {"codigo": "2", "descripcion": "Remojo"},
+    {"codigo": "3", "descripcion": "Pelambre"},
+    {"codigo": "4", "descripcion": "Descarne"},
+    {"codigo": "5", "descripcion": "Division"}
+  ],
+  "curtido": [
+    {"codigo": "0", "descripcion": "Desencale"},
+    {"codigo": "1", "descripcion": "Purga"},
+    {"codigo": "2", "descripcion": "Piquel"},
+    {"codigo": "3", "descripcion": "Curtido"}
+  ]
+}

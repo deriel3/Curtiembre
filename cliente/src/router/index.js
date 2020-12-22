@@ -125,6 +125,18 @@ const routes = [
         }
       },
     },
+    {
+      path: 'orden_tenido',
+      name: 'orden_tenido',
+      component: () => import(/* webpackChunkName: "orden_tenido" */ '../views/orden_tenido.vue'),
+      beforeEnter: (to, from, next) => {
+        if (store.state.user.permisos.filter((val) => val.cod_rol === 7).length > 0) {
+          next();
+        } else {
+          next('/CiteccalProd/inicio');
+        }
+      },
+    },
     ],
   },
 ];
