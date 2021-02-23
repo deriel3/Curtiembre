@@ -41,6 +41,8 @@ router.post('/verificar_codigo' ,jwtmid({secret: config.llave, algorithms: ['HS2
     
 })
 router.post('/inicio_sesion', async (req,res) => {
+    let ejemplo = await bcrypt.hash('123123123',10)
+    console.log(ejemplo)
     const usuario_buscado = await sql.awaitQuery("Select codigo,usuario,password from usuario where usuario.usuario = ? and estado = 'Activo'", req.body.usuario)
     if(usuario_buscado.length === 0)
     {
@@ -331,5 +333,11 @@ router.post('/estado_acabado',jwtmid({secret: config.llave, algorithms: ['HS256'
     const resultado = await sql.awaitQuery(query,values);
     res.json({cod:'200'});
 })
-
+router.get('/obtener_datos_ot',jwtmid({secret: config.llave, algorithms: ['HS256']}), async (req,res) => {
+    const formulas_pelambre = "SELECT codigo from cabecera_formula where proceso = '03'";
+    const resultado = await sql.awaitQuery(formulas_pelambre);
+    const formulas_curtido = "SELECT codigo from cabecera_formula where proceso = '04'";
+    const resultado_curtido = await sql.awaitQuery(formulas_curtido);
+    res.json({cod:'200', data: {pelambre: resultado, curtido: resultado_curtido}});
+})
 module.exports=router;

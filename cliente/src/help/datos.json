@@ -12,5 +12,22 @@
     {"codigo": "1", "descripcion": "Purga"},
     {"codigo": "2", "descripcion": "Piquel"},
     {"codigo": "3", "descripcion": "Curtido"}
+  ],
+  "recurtido": [
+    {"codigo":"0", "descripcion": "Raspado"},
+    {"codigo":"1", "descripcion": "Teñido"},
+    {"codigo":"2", "descripcion": "Secado"},
+    {"codigo":"3", "descripcion": "Secado Vacio"},
+    {"codigo":"4", "descripcion": "Secado"},
+    {"codigo":"5", "descripcion": "Humectacion"},
+    {"codigo":"6", "descripcion": "Molliza"},
+    {"codigo":"7", "descripcion": "Lijado"}
+  ],
+  "acabado": [
+    {"codigo":"0", "descripcion": "Pintado"},
+    {"codigo":"1", "descripcion": "Laqueado"},
+    {"codigo":"2", "descripcion": "Pulido"},
+    {"codigo":"3", "descripcion": "Planchado"},
+    {"codigo":"4", "descripcion": "Medicion"}
   ]
 }

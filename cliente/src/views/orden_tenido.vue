@@ -18,13 +18,19 @@
               <div>
                   <h1 class="d-inline ml-8">Nueva Orden de teñido:</h1>
               </div>
+              <formulario></formulario>
           </v-tab-item>
       </v-tabs-items>
     </div>
     </v-container>
 </template>
 <script>
+import formulario from '../components/orden_teñido/formulario.vue';
+
 export default {
+  components: {
+    formulario,
+  },
   data() {
     return {
       margen: 0,
