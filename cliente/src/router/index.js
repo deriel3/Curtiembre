@@ -126,6 +126,30 @@ const routes = [
       },
     },
     {
+      path: 'descargar_formula/:codigo',
+      name: 'descargar_formula',
+      component: () => import(/* webpackChunkName: "descargar_formula" */ '../views/descargar_formula.vue'),
+      beforeEnter: (to, from, next) => {
+        if (store.state.user.permisos.filter((val) => val.cod_rol === 6).length > 0) {
+          next();
+        } else {
+          next('/CiteccalProd/inicio');
+        }
+      },
+    },
+    {
+      path: 'orden_pedido_seguimiento/:codigo',
+      name: 'orden_pedido_seguimiento',
+      component: () => import(/* webpackChunkName: "orden_pedido_seguimiento" */ '../views/orden_pedido_seguimiento.vue'),
+      beforeEnter: (to, from, next) => {
+        if (store.state.user.permisos.filter((val) => val.cod_rol === 6).length > 0) {
+          next();
+        } else {
+          next('/CiteccalProd/inicio');
+        }
+      },
+    },
+    {
       path: 'orden_tenido',
       name: 'orden_tenido',
       component: () => import(/* webpackChunkName: "orden_tenido" */ '../views/orden_tenido.vue'),

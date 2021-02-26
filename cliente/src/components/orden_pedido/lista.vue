@@ -11,12 +11,9 @@
             v-model="seleccionados[0].codigo"
             label="Codigo">
             </v-text-field>
-            <v-row class="ma-5">
-              <v-col md="4" cols="4">
-              </v-col>
-            </v-row>
-            <v-btn color="primary" class="mr-4" @click="actualizar">Seguimiento</v-btn>
-            <v-btn color="error" @click="desactivar">Desactivar</v-btn>
+            <v-btn color="primary" class="mr-4"
+            :to="{name:'orden_pedido_seguimiento', params:{codigo: seleccionados[0].codigo}}">
+            Seguimiento</v-btn>
           </div>
         </v-card-text>
       </v-card>
@@ -83,14 +80,6 @@ export default {
     this.actualizar_tabla();
   },
   methods: {
-    desactivar() {
-      this.seleccionados[0].estado = 'Inactivo';
-      this.actualizar_estado('Inactivo');
-    },
-    activar() {
-      this.seleccionados[0].estado = 'Activo';
-      this.actualizar_estado('Activo');
-    },
     actualizar_estado(nuevoestado) {
       const { token } = store.state;
       const option = {
@@ -137,7 +126,6 @@ export default {
         .then((res) => {
           this.cargando = false;
           const { data } = res;
-          console.log(res.data);
           if (data.cod === '200') {
             this.lista_articulos = data.data;
           }

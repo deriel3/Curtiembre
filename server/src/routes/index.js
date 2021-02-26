@@ -340,4 +340,28 @@ router.get('/obtener_datos_ot',jwtmid({secret: config.llave, algorithms: ['HS256
     const resultado_curtido = await sql.awaitQuery(formulas_curtido);
     res.json({cod:'200', data: {pelambre: resultado, curtido: resultado_curtido}});
 })
+router.post('/obtener_seguimiento', jwtmid({secret: config.llave, algorithms: ['HS256']}), async (req,res) => {
+    
+    const formula_proceso = "SELECT codigo,kilos, pieles, ppelambre, pcurtido FROM orden_p where codigo = ?";
+    const values_proceso = [req.body.codigo];
+    const resultado_proceso = await sql.awaitQuery(formula_proceso,values_proceso);
+    const formula_seguimiento = "SELECT codigo_partida, proceso_base, proceso, codigo_seguimiento, agua, grasa, recorte_piel, carnaza, observacion, fecha_creacion from seguimiento where codigo_partida = ? and proceso_base = 0 order by proceso_base ASC";
+    const resulta_seguimiento = await sql.awaitQuery(formula_seguimiento,values_proceso);
+    res.json({cod:'200', data: {proceso: resultado_proceso, seguimiento: resulta_seguimiento}})
+})
+router.post('/guardar_seguimiento', jwtmid({secret: config.llave, algorithms: ['HS256']}), async (req,res) => {
+    const codigo_seguimiento = req.body.codigo+'-'+req.body.proceso_base+'-'+req.body.proceso;
+    const articulo = "INSERT INTO seguimiento (codigo_partida, proceso_base, proceso, kilos, pieles, codigo_seguimiento) VALUES ('"+req.body.codigo+"','"+req.body.proceso_base+"','"+req.body.proceso+"','"+req.body.kilo+"','"+req.body.pieles+"','"+codigo_seguimiento+"')";
+    const resultado_articulo = await sql.awaitQuery(articulo);
+    res.json({cod:'200'})
+})
+router.post('/guardar_desecho', jwtmid({secret: config.llave, algorithms: ['HS256']}), async (req,res) => {
+    const codigo_seguimiento = req.body.codigo+'-'+req.body.proceso_base+'-'+req.body.proceso;
+    console.log(codigo_seguimiento);
+    const articulo = "UPDATE seguimiento SET agua = ?, grasa = ?, recorte_piel = ?, carnaza = ?, observacion = ? WHERE codigo_seguimiento = ?";
+    const values = [req.body.agua, req.body.grasa, req.body.recorte_piel, req.body.carnaza, req.body.observacion, codigo_seguimiento];
+    const resultado_articulo = await sql.awaitQuery(articulo, values);
+    res.json({cod:'200'})
+})
+
 module.exports=router;
