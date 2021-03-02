@@ -2,8 +2,8 @@
     <v-container
     :style="{'margin-top':margen}">
     <v-btn class="secondary" target="_blank"
-    :to="{name:'descargar_formula', params:{codigo: codigo}}"
-    >Descargar Formula de Pelambre</v-btn>
+    :to="{name:'descargar_formula', params:{codigo: `${codigo}-0`}}"
+    >Ver Formula de Pelambre</v-btn>
     <h1>Seguimiento de partida: {{codigo}}</h1>
     <br>
     <h3>Proceso de Pelambre:</h3>

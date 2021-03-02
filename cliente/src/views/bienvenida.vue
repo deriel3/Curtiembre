@@ -31,6 +31,11 @@
           >
             <v-list-item-title>Materiales</v-list-item-title>
           </v-list-item>
+          <v-list-item to="almacenes"
+          :disabled="validar_permiso(1)"
+          >
+            <v-list-item-title>Almacenes</v-list-item-title>
+          </v-list-item>
           <v-list-item :to="{name:'formulas'}"
           :disabled="validar_permiso(2)
           || validar_permiso(3)

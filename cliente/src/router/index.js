@@ -51,6 +51,18 @@ const routes = [
       },
     },
     {
+      path: 'almacenes',
+      name: 'almacenes',
+      component: () => import(/* webpackChunkName: "almacenes" */ '../views/almacenes.vue'),
+      beforeEnter: (to, from, next) => {
+        if (store.state.user.permisos.filter((val) => val.cod_rol === 1).length > 0) {
+          next();
+        } else {
+          next('/CiteccalProd/inicio');
+        }
+      },
+    },
+    {
       path: 'articulo',
       name: 'articulo',
       component: () => import(/* webpackChunkName: "articulo" */ '../views/articulo.vue'),

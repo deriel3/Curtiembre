@@ -6,8 +6,9 @@
         <v-col md="3">
           <v-text-field
           label="Codigo de Partida"
+          readonly
           v-model="codigo"
-          @focusout="verificar_codigo"
+          @click="verificar_codigo"
           :error-messages="codigoErrors"
           @input="$v.codigo.$touch()"
           @blur="$v.codigo.$touch()"
@@ -26,6 +27,7 @@
           <v-text-field
           label="Pieles"
           v-model="pieles"
+          @focusout="verificar_almacen"
           :error-messages="pielesErrors"
           @input="$v.pieles.$touch()"
           @blur="$v.pieles.$touch()"
@@ -125,6 +127,38 @@ export default {
     this.obtener_datos();
   },
   methods: {
+    verificar_almacen() {
+      const { token } = store.state;
+      const option = {
+        // eslint-disable-next-line prefer-template
+        url: process.env.VUE_APP_URL_SERVER + '/api/verificar_almacen',
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+          'Content-Type': 'application/json;charset=UTF-8',
+        },
+        data: {
+          cod_almacen: 'MP',
+        },
+      };
+      axios(option)
+        .then((res) => {
+          if (res.data.cod === '200') {
+            const stock = res.data.data.cabecera[0].cantidad;
+            console.log(parseInt(stock, 10) < parseInt(this.pieles, 10));
+            if (parseInt(stock, 10) < parseInt(this.pieles, 10)) {
+              this.$toast.error('No se tiene suficientes pieles en el almacen de Materia Prima - Pieles Crudo');
+              this.pieles = '';
+            }
+          }
+        })
+        .catch((err) => {
+          if (err.response.status === 401) {
+            EventBus.$emit('cerrar_sesion');
+          }
+        });
+    },
     obtener_datos() {
       const { token } = store.state;
       const option = {
@@ -140,8 +174,16 @@ export default {
       axios(option)
         .then((res) => {
           if (res.data.cod === '200') {
+            const año = new Date().getFullYear();
             this.f_pelambre = res.data.data.pelambre;
             this.f_curtido = res.data.data.curtido;
+            if (res.data.data.codigo.length !== 0) {
+              const codigo = res.data.data.codigo[0].codigo.split('-');
+              const numero = parseInt(codigo[2], 10) + 1;
+              this.codigo = `OP-${año}-${numero}`;
+            } else {
+              this.codigo = `OP-${año}-1`;
+            }
           }
         })
         .catch((err) => {
@@ -151,36 +193,35 @@ export default {
         });
     },
     verificar_codigo() {
-      if (this.codigo !== '') {
-        const { token } = store.state;
-        const option = {
-          // eslint-disable-next-line prefer-template
-          url: process.env.VUE_APP_URL_SERVER + '/api/verificar_codigo_op',
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: 'application/json',
-            'Content-Type': 'application/json;charset=UTF-8',
-          },
-          data: {
-            codigo: this.codigo,
-          },
-        };
-        axios(option)
-          .then((res) => {
-            if (res.data.cod === '200') {
-              this.$toast.success('Codigo disponible.');
+      const { token } = store.state;
+      const option = {
+        // eslint-disable-next-line prefer-template
+        url: process.env.VUE_APP_URL_SERVER + '/api/verificar_codigo_op',
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+          'Content-Type': 'application/json;charset=UTF-8',
+        },
+      };
+      axios(option)
+        .then((res) => {
+          if (res.data.cod === '200') {
+            const año = new Date().getFullYear();
+            if (res.data.data.codigo.length !== 0) {
+              const codigo = res.data.data.codigo[0].codigo.split('-');
+              const numero = parseInt(codigo[2], 10) + 1;
+              this.codigo = `OP-${año}-${numero}`;
             } else {
-              this.$toast.error('Codigo ya guardado');
-              this.codigo = '';
+              this.codigo = `OP-${año}-1`;
             }
-          })
-          .catch((err) => {
-            if (err.response.status === 401) {
-              EventBus.$emit('cerrar_sesion');
-            }
-          });
-      }
+          }
+        })
+        .catch((err) => {
+          if (err.response.status === 401) {
+            EventBus.$emit('cerrar_sesion');
+          }
+        });
     },
     reiniciar() {
       this.codigo = '';
@@ -188,8 +229,8 @@ export default {
       this.pieles = '';
       this.Fpelambre = '';
       this.Fcurtido = '';
-      this.proceso = '';
-      this.curtido = '';
+      this.proceso = [];
+      this.curtido = [];
     },
     nueva_ordenp() {
       if (this.verficar()) {
