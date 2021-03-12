@@ -194,6 +194,11 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+      <v-btn class="green white--text"
+      v-if="curtido"
+      @click="curtido">
+        Seguimiento de curtido
+      </v-btn>
     </v-container>
 </template>
 <script>
@@ -225,6 +230,7 @@ export default {
       pieles: '',
       dialog: false,
       dialog2: false,
+      curtido: false,
       listafalta: [],
       listafinalizada: [],
       listaProceso: [],
@@ -351,6 +357,9 @@ export default {
             this.listaRealizada.push(nuevorealizado);
             this.listafinalizada.push(this.listafalta[0]);
             this.listafalta.splice(0, 1);
+            if (this.listafalta.length === 0) {
+              this.$emit('cambiartexto');
+            }
             this.kilo = 0;
             this.pieles = 0;
             this.$toast.success('Seguimiento Guardado.');
@@ -387,6 +396,9 @@ export default {
             this.listafalta = data.data.proceso[0].ppelambre.split(',');
             this.listafalta = this.listafalta.sort();
             this.listafalta.splice(0, this.listaRealizada.length);
+            if (this.listafalta.length === 0) {
+              this.$emit('cambiartexto');
+            }
             this.dialog = false;
           }
         })

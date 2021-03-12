@@ -282,7 +282,27 @@ router.post('/verificar_codigo_op',jwtmid({secret: config.llave, algorithms: ['H
 router.post('/guardar_op',jwtmid({secret: config.llave, algorithms:['HS256']}),async (req,res) => {
     const ingresar = "INSERT INTO orden_p (codigo, kilos, pieles ,fpelambre, fcurtido, autor, ppelambre, pcurtido) values ('"+req.body.codigo.toUpperCase()+"','"+req.body.kilo+"','"+req.body.piele+"','"+req.body.fpelambre+"','"+req.body.fcurtido+"','"+req.body.autor+"','"+req.body.ppelambre.toString()+"','"+req.body.pcurtido.toString()+"')";
     const resultado = await sql.awaitQuery(ingresar);
-    res.json({cod:'200'})
+    if(resultado) {
+        const act_almacen = "UPDATE almacen set cantidad = cantidad-"+req.body.piele+" where codigo = 'MP'";
+        const resultado_act_almacen = await sql.awaitQuery(act_almacen);
+        const año = new Date().getFullYear();
+        const ant = "SELECT codigo from historial_almacen  where cod_almacen = ? and accion = ? order by codigo DESC LIMIT 1 "
+        const resultado = await sql.awaitQuery(ant,['MP','1']);
+        if (resultado.length == 0)
+        {
+            codigo = año+'-1-1';        
+        }
+        else
+        {
+            const antcodigo = resultado[0].codigo;
+            const datos = antcodigo.split('-');
+            const nuevo= parseInt(datos[2])+1
+            codigo = año+'-1-'+nuevo;
+        }
+        const nuevo = "INSERT INTO historial_almacen (codigo, accion, cod_almacen, cantidad, observacion) values ('"+codigo+"','1','MP','"+req.body.piele+"','')";
+        const result = await sql.awaitQuery(nuevo);
+        res.json({cod:'200'})
+    }
 })
 router.get('/obtener_op',jwtmid({secret: config.llave, algorithms:['HS256']}),async (req,res) => {
     const lista = "SELECT codigo, kilos, pieles, fpelambre, fcurtido from orden_p";
@@ -339,12 +359,20 @@ router.get('/obtener_datos_ot',jwtmid({secret: config.llave, algorithms: ['HS256
 })
 router.post('/obtener_seguimiento', jwtmid({secret: config.llave, algorithms: ['HS256']}), async (req,res) => {
     
-    const formula_proceso = "SELECT codigo,kilos, pieles, ppelambre, pcurtido FROM orden_p where codigo = ?";
+    const formula_proceso = "SELECT codigo,kilos, pieles, ppelambre, kilosc, pielesc, pcurtido FROM orden_p where codigo = ?";
     const values_proceso = [req.body.codigo];
     const resultado_proceso = await sql.awaitQuery(formula_proceso,values_proceso);
     const formula_seguimiento = "SELECT codigo_partida, proceso_base, proceso, codigo_seguimiento, agua, grasa, recorte_piel, carnaza, observacion, fecha_creacion from seguimiento where codigo_partida = ? and proceso_base = 0 order by proceso_base ASC";
     const resulta_seguimiento = await sql.awaitQuery(formula_seguimiento,values_proceso);
-    res.json({cod:'200', data: {proceso: resultado_proceso, seguimiento: resulta_seguimiento}})
+    const formula_seguimiento_curtido = "SELECT codigo_partida, proceso_base, proceso, codigo_seguimiento, agua, grasa, recorte_piel, carnaza, observacion, fecha_creacion from seguimiento where codigo_partida = ? and proceso_base = 1 order by proceso_base ASC";
+    const resulta_seguimiento_curtido = await sql.awaitQuery(formula_seguimiento_curtido,values_proceso)
+    res.json({cod:'200', data: {proceso: resultado_proceso, seguimiento: resulta_seguimiento, curtido: resulta_seguimiento_curtido}})
+})
+router.post('/act_curtido', jwtmid({secret: config.llave, algorithms: ['HS256']}), async (req,res) => {
+    const formula_proceso = "UPDATE orden_p set kilosc = ?, pielesc = ? where codigo = ?";
+    const values_proceso = [req.body.kilo,req.body.pieles,req.body.codigo];
+    const resultado = await sql.awaitQuery(formula_proceso,values_proceso)
+    res.json({cod:'200'})
 })
 router.post('/guardar_seguimiento', jwtmid({secret: config.llave, algorithms: ['HS256']}), async (req,res) => {
     const codigo_seguimiento = req.body.codigo+'-'+req.body.proceso_base+'-'+req.body.proceso;

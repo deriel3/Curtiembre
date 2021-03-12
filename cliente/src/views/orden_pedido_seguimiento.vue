@@ -7,18 +7,25 @@
     <h1>Seguimiento de partida: {{codigo}}</h1>
     <br>
     <h3>Proceso de Pelambre:</h3>
-    <pelambre></pelambre>
+    <pelambre @cambiartexto=mostrar_curtido></pelambre>
+    <div v-if="curtido">
+      <h3>Proceso de Curtido:</h3>
+      <curtido></curtido>
+    </div>
     </v-container>
 </template>
 <script>
 import pelambre from '../components/orden_pedido_seguimiento/pelambre.vue';
+import curtido from '../components/orden_pedido_seguimiento/curtido.vue';
 
 export default {
   components: {
     pelambre,
+    curtido,
   },
   data() {
     return {
+      curtido: false,
       margen: 0,
       codigo: this.$route.params.codigo,
     };
@@ -30,6 +37,9 @@ export default {
     f_margen() {
       const header = document.getElementsByTagName('header')[0];
       return window.getComputedStyle(header).getPropertyValue('height');
+    },
+    mostrar_curtido() {
+      this.curtido = true;
     },
   },
 
