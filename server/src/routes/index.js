@@ -357,9 +357,19 @@ router.get('/obtener_datos_ot',jwtmid({secret: config.llave, algorithms: ['HS256
     const resultado_curtido = await sql.awaitQuery(formulas_curtido);
     res.json({cod:'200', data: {pelambre: resultado, curtido: resultado_curtido}});
 })
+router.post('/fin_orden',jwtmid({secret: config.llave, algorithms: ['HS256']}), async (req,res) => {
+    const formulas_pelambre = "update orden_p set fin = 1 where codigo = ?";
+    const values = [req.body.codigo];
+    const resultado = await sql.awaitQuery(formulas_pelambre,values);
+    if(resultado) {
+        res.json({cod:'200'});   
+    } else {
+        res.json({cod:'201'});
+    }
+})
 router.post('/obtener_seguimiento', jwtmid({secret: config.llave, algorithms: ['HS256']}), async (req,res) => {
     
-    const formula_proceso = "SELECT codigo,kilos, pieles, ppelambre, kilosc, pielesc, pcurtido FROM orden_p where codigo = ?";
+    const formula_proceso = "SELECT codigo,kilos, pieles, ppelambre, kilosc, pielesc, pcurtido,fin FROM orden_p where codigo = ?";
     const values_proceso = [req.body.codigo];
     const resultado_proceso = await sql.awaitQuery(formula_proceso,values_proceso);
     const formula_seguimiento = "SELECT codigo_partida, proceso_base, proceso, codigo_seguimiento, agua, grasa, recorte_piel, carnaza, observacion, fecha_creacion from seguimiento where codigo_partida = ? and proceso_base = 0 order by proceso_base ASC";
@@ -416,14 +426,14 @@ router.post('/guardar_ingreso', jwtmid({secret: config.llave, algorithms: ['HS25
     const resultado = await sql.awaitQuery(ant,[cod_almacen,accion]);
     if (resultado.length == 0)
     {
-        codigo = año+'-'+accion+'-1';        
+        codigo = año+'-'+cod_almacen+'-'+accion+'-1';        
     }
     else
     {
         const antcodigo = resultado[0].codigo;
         const datos = antcodigo.split('-');
-        const nuevo= parseInt(datos[2])+1
-        codigo = año+'-'+accion+'-'+nuevo;
+        const nuevo= parseInt(datos[3])+1
+        codigo = año+'-'+cod_almacen+'-'+accion+'-'+nuevo;
     }
     const nuevo = "INSERT INTO historial_almacen (codigo, accion, cod_almacen, cantidad, observacion) values ('"+codigo+"','"+accion+"','"+cod_almacen+"','"+cantidad+"','"+observacion+"')";
     const result = await sql.awaitQuery(nuevo);

@@ -2,19 +2,24 @@
   <v-container>
     <v-card width="1500" class="mx-auto pa-4">
       <v-btn color="success" @click="obtener_datos">Refrescar Data</v-btn>
-      <v-select
-        label="Formula"
-        :items="f_pelambre"
-        item-value="codigo"
-        item-text="codigo"
-        v-model="Fpelambre"
-        :error-messages="pelambreErrors"
-        @input="$v.Fpelambre.$touch()"
-        @blur="$v.Fpelambre.$touch()"></v-select>
+      <v-row>
+        <v-col md="2">
+          <v-select
+            label="Proceso"
+            :items="tipo_proceso"
+            v-model="proceso_seleccionado"
+            item-value="codigo"
+            item-text="nombre"
+            :error-messages="procesoErros"
+            @input="$v.proceso_seleccionado.$touch()"
+            @blur="$v.proceso_seleccionado.$touch()"></v-select>
+        </v-col>
+      </v-row>
       <v-row>
         <v-col md="3">
           <v-text-field
-          label="Codigo de Partida"
+          label="Codigo de Teñido"
+          readonly
           v-model="codigo"
           @focusout="verificar_codigo"
           :error-messages="codigoErrors"
@@ -43,13 +48,13 @@
         <v-col md="2">
           <v-select
           label="Formula"
-          :items="f_pelambre"
+          :items="formula"
           item-value="codigo"
           item-text="codigo"
-          v-model="Fpelambre"
+          v-model="Fformula"
           :error-messages="pelambreErrors"
-          @input="$v.Fpelambre.$touch()"
-          @blur="$v.Fpelambre.$touch()"></v-select>
+          @input="$v.Fformula.$touch()"
+          @blur="$v.Fformula.$touch()"></v-select>
         </v-col>
         <v-col md="3">
           <v-text-field
@@ -59,7 +64,7 @@
           ></v-text-field>
         </v-col>
       </v-row>
-      <div>
+      <div v-if="proceso_seleccionado === '1'">
         <label for="">Procesos Recurtido:</label>
         <v-row>
           <v-col md="4" cols="4" v-for="item in items_pelambre" :key="item.codigo">
@@ -71,7 +76,7 @@
           </v-col>
         </v-row>
       </div>
-      <div>
+      <div v-if="proceso_seleccionado === '2'">
         <label for="">Procesos Acabado:</label>
         <v-row>
           <v-col md="4" cols="4" v-for="item in items_curtido" :key="item.codigo">
@@ -102,25 +107,33 @@ export default {
     codigo: { required },
     kilo: { required },
     pieles: { required },
-    Fpelambre: { required },
+    Fformula: { required },
     Fcurtido: { required },
-    proceso: { required },
+    proceso_seleccionado: { required },
     curtido: { required },
   },
   data() {
     return {
+      tipo_proceso: [
+        {
+          nombre: 'Recurtido',
+          codigo: '1',
+        },
+        {
+          nombre: 'Acabado',
+          codigo: '2',
+        }],
+      proceso_seleccionado: '',
       items_pelambre: data.recurtido,
       items_curtido: data.acabado,
-      proceso: [],
       curtido: [],
       codigo: '',
       kilo: '',
       pieles: '',
-      Fpelambre: '',
-      Fcurtido: '',
+      Fformula: '',
       autor: store.state.user.id,
-      f_pelambre: [],
-      f_curtido: [],
+      formula: [],
+      proceso: [],
     };
   },
   created() {
@@ -236,16 +249,14 @@ export default {
       this.$v.codigo.$touch();
       this.$v.kilo.$touch();
       this.$v.pieles.$touch();
-      this.$v.Fpelambre.$touch();
-      this.$v.Fcurtido.$touch();
-      this.$v.proceso.$touch();
+      this.$v.Fformula.$touch();
+      this.$v.proceso_seleccionado.$touch();
       this.$v.curtido.$touch();
       if (!this.$v.codigo.$error
       && !this.$v.kilo.$error
       && !this.$v.pieles.$error
-      && !this.$v.Fpelambre.$error
-      && !this.$v.Fcurtido.$error
-      && !this.$v.proceso.$error
+      && !this.$v.Fformula.$error
+      && !this.$v.proceso_seleccionado.$error
       && !this.$v.curtido.$error) {
         return true;
       }
@@ -273,20 +284,14 @@ export default {
     },
     pelambreErrors() {
       const errors = [];
-      if (!this.$v.Fpelambre.$dirty) return errors;
-      if (!this.$v.Fpelambre.required) errors.push('El campo obligatorio.');
-      return errors;
-    },
-    curtidoErros() {
-      const errors = [];
-      if (!this.$v.Fcurtido.$dirty) return errors;
-      if (!this.$v.Fcurtido.required) errors.push('El campo obligatorio.');
+      if (!this.$v.Fformula.$dirty) return errors;
+      if (!this.$v.Fformula.required) errors.push('El campo obligatorio.');
       return errors;
     },
     procesoErros() {
       const errors = [];
-      if (!this.$v.proceso.$dirty) return errors;
-      if (!this.$v.proceso.required) errors.push('El campo obligatorio.');
+      if (!this.$v.proceso_seleccionado.$dirty) return errors;
+      if (!this.$v.proceso_seleccionado.required) errors.push('El campo obligatorio.');
       return errors;
     },
     pcurtidoErrors() {

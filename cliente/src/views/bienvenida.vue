@@ -43,14 +43,6 @@
           || validar_permiso(5)">
             <v-list-item-title>Base de datos de Formulas</v-list-item-title>
           </v-list-item>
-          <v-list-item :to="{name:'articulo'}"
-          :disabled="validar_permiso(9)">
-            <v-list-item-title>Base de datos de Articulos</v-list-item-title>
-          </v-list-item>
-          <v-list-item :to="{name:'acabados'}"
-          :disabled="validar_permiso(9)">
-            <v-list-item-title>Base de datos de Acabados</v-list-item-title>
-          </v-list-item>
           <v-list-item :to="{name:'orden_pedido'}"
           :disabled="validar_permiso(6)">
             <v-list-item-title>Orden de Pedido</v-list-item-title>

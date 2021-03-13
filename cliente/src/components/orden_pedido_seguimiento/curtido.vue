@@ -106,6 +106,8 @@
           </v-col>
         </v-row>
       </div>
+      <v-btn v-if="listafalta.length === 0 && this.fin === 0" class="success"
+      @click="dialog4 = true">Finalizar OP</v-btn>
       <v-dialog
         v-model="dialog2"
         max-width="600px"
@@ -258,6 +260,52 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+      <v-dialog
+        v-model="dialog4"
+        max-width="600px"
+      >
+        <v-card>
+          <v-card-title>
+            <span class="headline">Pieles Wet Blue resultantes</span>
+          </v-card-title>
+          <v-card-text>
+            <v-container>
+              <v-row>
+                <v-col
+                  cols="12"
+                  sm="6"
+                  md="6"
+                >
+                  <v-text-field
+                    label="Pieles"
+                    v-model="pieles"
+                    :error-messages="pielesErrors"
+                    @input="$v.pieles.$touch()"
+                    @blur="$v.pieles.$touch()"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="blue darken-1"
+              text
+              @click="dialog4 = false"
+            >
+              Close
+            </v-btn>
+            <v-btn
+              color="blue darken-1"
+              text
+              @click="fin_orden"
+            >
+              Save
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </v-container>
 </template>
 <script>
@@ -277,6 +325,7 @@ export default {
   },
   data() {
     return {
+      fin: 0,
       primer: false,
       cod_pro: '',
       descripcion: '',
@@ -291,6 +340,7 @@ export default {
       dialog: false,
       dialog2: false,
       dialog3: false,
+      dialog4: false,
       listafalta: [],
       listafinalizada: [],
       listaProceso: [],
@@ -317,6 +367,72 @@ export default {
     this.actualizar_tabla();
   },
   methods: {
+    almacenar() {
+      const cod = this.$route.params.codigo;
+      const { token } = store.state;
+      const option = {
+        // eslint-disable-next-line prefer-template
+        url: process.env.VUE_APP_URL_SERVER + '/api/guardar_ingreso',
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+          'Content-Type': 'application/json;charset=UTF-8',
+        },
+        data: {
+          cod_almacen: 'WB',
+          accion: '0',
+          cantidad: this.pieles,
+          observacion: cod,
+        },
+      };
+      axios(option)
+        .then((res) => {
+          const { data } = res;
+          if (data.cod === '200') {
+            this.kilo = 0;
+            this.pieles = 0;
+            this.$toast.success('Pieles almacenadas en almacen.');
+          }
+        })
+        .catch((err) => {
+          if (err.response.status === 401) {
+            EventBus.$emit('cerrar_sesion');
+          }
+        });
+    },
+    fin_orden() {
+      const cod = this.$route.params.codigo;
+      const { token } = store.state;
+      const option = {
+        // eslint-disable-next-line prefer-template
+        url: process.env.VUE_APP_URL_SERVER + '/api/fin_orden',
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+          'Content-Type': 'application/json;charset=UTF-8',
+        },
+        data: {
+          codigo: cod,
+        },
+      };
+      axios(option)
+        .then((res) => {
+          const { data } = res;
+          if (data.cod === '200') {
+            this.fin = 1;
+            this.dialog4 = false;
+            this.$toast.success('Orden de Pedido finalizada.');
+            this.almacenar();
+          }
+        })
+        .catch((err) => {
+          if (err.response.status === 401) {
+            EventBus.$emit('cerrar_sesion');
+          }
+        });
+    },
     Guardarprimer() {
       const cod = this.$route.params.codigo;
       const { token } = store.state;
@@ -482,6 +598,7 @@ export default {
         .then((res) => {
           const { data } = res;
           if (data.cod === '200') {
+            this.fin = data.data.proceso[0].fin;
             this.listaProceso = data.data.proceso[0].pcurtido.split(',');
             this.listaRealizada = data.data.curtido;
             this.listafinalizada = this.listaRealizada.map((x) => x.proceso);
