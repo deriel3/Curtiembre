@@ -258,7 +258,7 @@ export default {
         axios(option)
           .then((res) => {
             if (res.data.cod === '200') {
-              this.$toast.error('Orden de Pedido creada correctamente');
+              this.$toast.success('Orden de Pedido creada correctamente');
               this.reiniciar();
             }
           })

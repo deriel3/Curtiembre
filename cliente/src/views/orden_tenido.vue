@@ -13,6 +13,7 @@
               <div>
                   <h1 class="d-inline ml-8">Ordenes de teñido registradas</h1>
               </div>
+              <lista></lista>
           </v-tab-item>
           <v-tab-item>
               <div>
@@ -26,10 +27,12 @@
 </template>
 <script>
 import formulario from '../components/orden_teñido/formulario.vue';
+import lista from '../components/orden_teñido/lista.vue';
 
 export default {
   components: {
     formulario,
+    lista,
   },
   data() {
     return {

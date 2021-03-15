@@ -4,6 +4,7 @@
   <div>
     <h1 class="d-inline ml-8">Almacenes de la empresa</h1>
     <OrdenIngreso class="d-inline float-right"></OrdenIngreso>
+    <OrdenSalida class="d-inline float-right mr-5"></OrdenSalida>
   </div>
   <lista></lista>
   </v-container>
@@ -11,11 +12,13 @@
 <script>
 import lista from '../components/almacenes/lista.vue';
 import OrdenIngreso from '../components/almacenes/orden_ingreso.vue';
+import OrdenSalida from '../components/almacenes/orden_salida.vue';
 
 export default {
   components: {
     lista,
     OrdenIngreso,
+    OrdenSalida,
   },
   data() {
     return {

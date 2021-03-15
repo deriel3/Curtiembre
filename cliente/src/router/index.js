@@ -173,6 +173,18 @@ const routes = [
         }
       },
     },
+    {
+      path: 'orden_tenido_seguimiento/:codigo',
+      name: 'orden_tenido_seguimiento',
+      component: () => import(/* webpackChunkName: "orden_tenido_seguimiento" */ '../views/orden_tenido_seguimiento.vue'),
+      beforeEnter: (to, from, next) => {
+        if (store.state.user.permisos.filter((val) => val.cod_rol === 6).length > 0) {
+          next();
+        } else {
+          next('/CiteccalProd/inicio');
+        }
+      },
+    },
     ],
   },
 ];
