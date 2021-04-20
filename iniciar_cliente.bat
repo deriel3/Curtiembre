@@ -1,0 +1,3 @@
+echo Iniciando cliente...
+cd C:\Users\leina\Desktop\curtiembre\Curtiembre\cliente
+npm run serve
